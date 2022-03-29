@@ -1,0 +1,56 @@
+const { Client, MessageComponentInteraction, MessageButton, MessageActionRow, MessageEmbed, Message, MessageSelectMenu } = require("discord.js");
+const ms = require('ms');
+
+module.exports = {
+    name: "리마인더",
+    description: "시간에 맞춰 알림을 요청한 사람을 언급합니다.",
+    options: [
+        {
+            name: "시간",
+            description: "얼마 후에 언급할 지 적어주세요. (단위 : 시간, 분, 초)",
+            type: "STRING"
+        }
+    ],
+
+    /**
+     * 
+     * @param {Client} client 
+     * @param {*} interaction
+     * @param {*} args 
+     * @param {Message} message
+     */
+
+    run: async (client, interaction, args, message) => {
+        let time = args[0]
+        if (args[0].indexOf("시간")!=-1){
+            let time = args[0].replace("시간","");
+            time = time.replace(" ","");
+            time = Number(time);
+            time = time*3600000;
+        } else if (args[0].indexOf("분")!=-1){
+            let time = args[0].replace("분","");
+            time = time.replace(" ","");
+            time = Number(time);
+            time = time*60000;
+        } else if (args[0].indexOf("초")!=-1){
+            let time = args[0].replace("초","");
+            time = time.replace(" ","");
+            time = Number(time);
+            time = time*1000;
+        } else return message.followUp ({ content : '시간을 입력하지 않으셨습니다. 시간을 입력하세요.' });
+        const REMINDER_SET = new MessageEmbed()
+            .setColor("#17988E")
+            .setAuthor("| 가상국가전쟁", client.user.displayAvatarURL())
+            .setTitle("<a:yes:888745318357803008> [리마인더] 리마인더 설정이 완료되었습니다!")
+            .setDescription(`${interaction.user.username} 님의 리마인더가 설정되었습니다!`)
+            .addField("> 요청한 시간",`> ${args[0]}`)
+            .setThumbnail("https://i.imgur.com/e7PBcBy.png")
+            .setTimestamp()
+            .setFooter(`${interaction.user.tag} 유저에 의해 요청됨`, interaction.user.displayAvatarURL());
+            interaction.followUp({embeds : [REMINDER_SET]})
+
+            setTimeout(async function() {
+                interaction.followUp({ content: `<@${interaction.user.username}> 시간이 다 됐습니다!`})
+            }, time);
+    }
+}
